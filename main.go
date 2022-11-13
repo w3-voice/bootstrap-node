@@ -8,7 +8,7 @@ import (
 	"github.com/hood-chat/core/repo"
 	"github.com/hood-chat/core/store"
 
-	// logging "github.com/ipfs/go-log"
+	logging "github.com/ipfs/go-log"
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p/config"
 	"github.com/libp2p/go-libp2p/p2p/net/connmgr"
@@ -21,10 +21,10 @@ func init() {
 
 // Main function
 func main() {
-	// err := logging.SetLogLevel("*", "DEBUG")
-	// if err != nil {
-	// 	panic(err)
-	// }
+	err := logging.SetLogLevel("*", "DEBUG")
+	if err != nil {
+		panic(err)
+	}
 	s, err := store.NewStore("./data")
 	if err != nil {
 		panic(err)
@@ -45,18 +45,22 @@ func main() {
 		panic(err)
 	}
 
-	_, err = hb.Create(opt)
+	h, err := hb.Create(opt)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println("Welcome to main() function")
+	fmt.Printf("Welcome to main() function %s", h.Addrs())
 
 	select {} // block forever
 }
 
 var ListenAddrs = func(cfg *config.Config) error {
-	defaultIP4ListenAddr, err := multiaddr.NewMultiaddr("/ip4/0.0.0.0/tcp/4001")
+	ip4ListenAddr, err := multiaddr.NewMultiaddr("/ip4/0.0.0.0/tcp/4001")
+	if err != nil {
+		return err
+	}
+	quicListenAddr, err := multiaddr.NewMultiaddr("/ip4/0.0.0.0/udp/4001/quic")
 	if err != nil {
 		return err
 	}
@@ -66,7 +70,8 @@ var ListenAddrs = func(cfg *config.Config) error {
 		return err
 	}
 	return cfg.Apply(libp2p.ListenAddrs(
-		defaultIP4ListenAddr,
+		quicListenAddr,
+		ip4ListenAddr,
 		defaultIP6ListenAddr,
 	))
 }
