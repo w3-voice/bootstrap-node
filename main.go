@@ -7,7 +7,8 @@ import (
 	"github.com/hood-chat/core/entity"
 	"github.com/hood-chat/core/repo"
 	"github.com/hood-chat/core/store"
-	logging "github.com/ipfs/go-log"
+
+	// logging "github.com/ipfs/go-log"
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p/config"
 	"github.com/libp2p/go-libp2p/p2p/net/connmgr"
@@ -20,10 +21,10 @@ func init() {
 
 // Main function
 func main() {
-	err := logging.SetLogLevel("*", "DEBUG")
-	if err != nil {
-		panic(err)
-	}
+	// err := logging.SetLogLevel("*", "DEBUG")
+	// if err != nil {
+	// 	panic(err)
+	// }
 	s, err := store.NewStore("./data")
 	if err != nil {
 		panic(err)
