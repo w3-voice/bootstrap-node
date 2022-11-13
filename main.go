@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 
 	"github.com/hood-chat/core"
 	"github.com/hood-chat/core/entity"
@@ -15,13 +14,16 @@ import (
 	"github.com/multiformats/go-multiaddr"
 )
 
-func init() {
-	fmt.Println("Hello! init() function")
-}
+var log = logging.Logger("boothood")
 
 // Main function
 func main() {
-	err := logging.SetLogLevel("*", "DEBUG")
+	err := logging.SetLogLevel("boothood", "DEBUG")
+	if err != nil {
+		panic(err)
+	}
+
+	err = logging.SetLogLevel("PM", "DEBUG")
 	if err != nil {
 		panic(err)
 	}
@@ -50,7 +52,7 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("Welcome to main() function %s", h.Addrs())
+	log.Debugf("Welcome to main() function %s", h.Addrs())
 
 	select {} // block forever
 }
