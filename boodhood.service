@@ -1,0 +1,10 @@
+[Unit]
+Description=Libp2p bootstrap server
+
+[Service]
+User=libp2p
+ExecStart=/usr/local/bin/hbnode
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
