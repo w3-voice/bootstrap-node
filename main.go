@@ -1,7 +1,6 @@
 package main
 
 import (
-
 	"github.com/hood-chat/core"
 	"github.com/hood-chat/core/entity"
 	"github.com/hood-chat/core/repo"
@@ -10,7 +9,7 @@ import (
 	logging "github.com/ipfs/go-log"
 	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p/config"
-	"github.com/libp2p/go-libp2p/p2p/net/connmgr"
+	"github.com/libp2p/go-libp2p/p2p/host/autorelay"
 	"github.com/multiformats/go-multiaddr"
 )
 
@@ -18,15 +17,14 @@ var log = logging.Logger("boothood")
 
 // Main function
 func main() {
-	err := logging.SetLogLevel("boothood", "DEBUG")
-	if err != nil {
-		panic(err)
-	}
-
-	err = logging.SetLogLevel("PM", "DEBUG")
-	if err != nil {
-		panic(err)
-	}
+	// err := logging.SetLogLevel("*", "DEBUG")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// err = logging.SetLogLevel("*", "DEBUG")
+	// if err != nil {
+	// 	panic(err)
+	// }
 	s, err := store.NewStore("./data")
 	if err != nil {
 		panic(err)
@@ -34,25 +32,35 @@ func main() {
 	rIdentity := repo.NewIdentityRepo(s)
 	id, err := rIdentity.Get()
 	if err != nil {
-		id, err = entity.CreateIdentity("bootstraper")
+		id, err = entity.CreateIdentity("hoodboot")
 		if err != nil {
 			panic(err)
 		}
+		err := rIdentity.Set(id)
+		if err != nil {
+			panic(err)
+		}
+
 	}
 	opt := Option()
 
-	opt.SetIdentity(&id)
+	err = opt.SetIdentity(&id)
+	if err != nil {
+		log.Debugf("Can not store identity")
+		panic("can not store identity")
+	}
 	hb := core.DefaultRoutedHost{}
 	if err != nil {
 		panic(err)
 	}
-
 	h, err := hb.Create(opt)
+
 	if err != nil {
 		panic(err)
 	}
 
-	log.Debugf("Welcome to main() function %s", h.Addrs())
+	log.Debugf("Hoodboot listens on %s", h.Addrs())
+	log.Debugf("Hoodboot Peer ID is %s", h.ID())
 
 	select {} // block forever
 }
@@ -66,11 +74,11 @@ var ListenAddrs = func(cfg *config.Config) error {
 	if err != nil {
 		return err
 	}
-
 	defaultIP6ListenAddr, err := multiaddr.NewMultiaddr("/ip6/::/tcp/4001")
 	if err != nil {
 		return err
 	}
+
 	return cfg.Apply(libp2p.ListenAddrs(
 		quicListenAddr,
 		ip4ListenAddr,
@@ -84,11 +92,6 @@ func Option() core.Option {
 	// Let's create a second host setting some more options.
 	// Set your own keypair
 
-	con, err := connmgr.NewConnManager(10, 200)
-	if err != nil {
-		panic(err)
-	}
-
 	opt := []libp2p.Option{
 		libp2p.DefaultTransports,
 		libp2p.DefaultSecurity,
@@ -97,13 +100,14 @@ func Option() core.Option {
 		ListenAddrs,
 		// Let's prevent our peer from having too many
 		// connections by attaching a connection manager.
-		libp2p.ConnectionManager(con),
+		libp2p.DefaultResourceManager,
 		// libp2p.DefaultMuxers,
 		// Let this host use relays and advertise itself on relays if
 		// it finds it is behind NAT. Use libp2p.Relay(options...) to
 		// enable active relays and more.
 		// libp2p.EnableAutoRelay(),
-		libp2p.EnableAutoRelay(),
+		libp2p.EnableAutoRelay(autorelay.WithDefaultStaticRelays()),
+		libp2p.EnableRelayService(),
 		// If you want to help other peers to figure out if they are behind
 		// NATs, you can launch the server-side of AutoNAT too (AutoRelay
 		// already runs the client)
@@ -112,6 +116,7 @@ func Option() core.Option {
 		// performance issues.
 		libp2p.EnableNATService(),
 		libp2p.EnableHolePunching(),
+		libp2p.ForceReachabilityPublic(),
 	}
 	return core.Option{
 		LpOpt: opt,
