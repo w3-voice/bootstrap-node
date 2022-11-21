@@ -8,13 +8,12 @@ RUN apt-get update && apt-get install -y \
 
 ENV SRC_DIR /hbnode
 
-COPY go.mod $SRC_DIR # <- COPY go.mod and go.sum files to the workspace
+WORKDIR $SRC_DIR
+
+COPY go.mod $SRC_DIR
 COPY go.sum $SRC_DIR
 
 RUN go mod download
-
-
-WORKDIR $SRC_DIR
 
 COPY . $SRC_DIR
 
