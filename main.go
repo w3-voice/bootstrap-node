@@ -1,26 +1,16 @@
 package main
 
 import (
-	"context"
-
 	"github.com/hood-chat/core"
 	"github.com/hood-chat/core/entity"
 	"github.com/hood-chat/core/repo"
 	"github.com/hood-chat/core/store"
-	ds "github.com/ipfs/go-datastore"
-	dsync "github.com/ipfs/go-datastore/sync"
 	libp2p "github.com/libp2p/go-libp2p"
-	host "github.com/libp2p/go-libp2p-core/host"
-
-	dht "github.com/libp2p/go-libp2p-kad-dht"
-	rh "github.com/libp2p/go-libp2p/p2p/host/routed"
-
-	// "github.com/ipfs/kubo/core/bootstrap"
 
 	logging "github.com/ipfs/go-log"
-	rcmgr "github.com/libp2p/go-libp2p-resource-manager"
 	"github.com/libp2p/go-libp2p/config"
 	"github.com/libp2p/go-libp2p/p2p/host/autorelay"
+	rcmgr "github.com/libp2p/go-libp2p/p2p/host/resource-manager"
 	"github.com/multiformats/go-multiaddr"
 )
 
@@ -28,14 +18,6 @@ var log = logging.Logger("boothood")
 
 // Main function
 func main() {
-	// err := logging.SetLogLevel("*", "DEBUG")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// err = logging.SetLogLevel("*", "DEBUG")
-	// if err != nil {
-	// 	panic(err)
-	// }
 	s, err := store.NewStore("./data")
 	if err != nil {
 		panic(err)
@@ -60,7 +42,7 @@ func main() {
 		log.Debugf("Can not store identity")
 		panic("can not store identity")
 	}
-	hb := Host{}
+	hb := core.DefaultRoutedHost{}
 	if err != nil {
 		panic(err)
 	}
@@ -98,42 +80,12 @@ var ListenAddrs = func(cfg *config.Config) error {
 }
 
 func Option() core.Option {
-	// Now, normally you do not just want a simple host, you want
-	// that is fully configured to best support your p2p application.
-	// Let's create a second host setting some more options.
-	// Set your own keypair
-	// Start with the default scaling limits.
-
-	// The resource manager expects a limiter, se we create one from our limits.
-
-	// (Optional if you want metrics) Construct the OpenCensus metrics reporter.
-	// str, err := rcmgrObs.NewStatsTraceReporter()
-	// if err != nil {
-	// 	panic(err)
-	// }
 
 	opt := []libp2p.Option{
-		libp2p.DefaultTransports,
-		libp2p.DefaultSecurity,
-		// Use the keypair we generated
-		// Multiple listen addresses
 		ListenAddrs,
-		// Let's prevent our peer from having too many
-		// connections by attaching a connection manager.
 		ResourceManager,
-		// libp2p.DefaultMuxers,
-		// Let this host use relays and advertise itself on relays if
-		// it finds it is behind NAT. Use libp2p.Relay(options...) to
-		// enable active relays and more.
-		// libp2p.EnableAutoRelay(),
 		libp2p.EnableAutoRelay(autorelay.WithDefaultStaticRelays()),
 		libp2p.EnableRelayService(),
-		// If you want to help other peers to figure out if they are behind
-		// NATs, you can launch the server-side of AutoNAT too (AutoRelay
-		// already runs the client)
-		//
-		// This service is highly rate-limited and should not cause any
-		// performance issues.
 		libp2p.EnableNATService(),
 		libp2p.EnableHolePunching(),
 		libp2p.ForceReachabilityPublic(),
@@ -155,46 +107,4 @@ var ResourceManager = func(cfg *libp2p.Config) error {
 	}
 
 	return cfg.Apply(libp2p.ResourceManager(mgr))
-}
-
-type Host struct {
-}
-
-func (b Host) Create(opt core.Option) (host.Host, error) {
-	basicHost, err := libp2p.New(opt.LpOpt...)
-	if err != nil {
-		return nil, err
-	}
-
-	// Construct a datastore (needed by the DHT). This is just a simple, in-memory thread-safe datastore.
-	dstore := dsync.MutexWrap(ds.NewMapDatastore())
-
-	// Make the DHT
-	kDht := dht.NewDHT(context.Background(), basicHost, dstore)
-	// bt := []string{
-	// 	"/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN",
-	// 	"/dnsaddr/bootstrap.libp2p.io/p2p/QmQCU2EcMqAqQPR2i9bChDtGNJchTbq5TbXJJ16u19uLTa",
-	// 	"/dnsaddr/bootstrap.libp2p.io/p2p/QmbLHAnMoJPWSCR5Zhtx6BHJX9KiKNN6tpvbUcqanj75Nb",
-	// 	"/dnsaddr/bootstrap.libp2p.io/p2p/QmcZf59bWwK5XFi76CZX8cbJ4BhTzzA3gU1ZjYZcYW3dwt",
-	// 	"/ip4/104.131.131.82/tcp/4001/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ",
-	// }
-
-	// bts, err := core.ParseBootstrapPeers(bt)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// btconf := bootstrap.BootstrapConfigWithPeers(bts)
-	// btconf.MinPeerThreshold = 2
-
-	// // connect to the chosen ipfs nodes
-	// _, err = bootstrap.Bootstrap(opt.ID, basicHost, kDht, btconf)
-	// if err != nil {
-	// 	log.Error("bootstrap failed. ", err)
-	// 	return nil, err
-	// }
-	// Make the routed host
-	routedHost := rh.Wrap(basicHost, kDht)
-
-	log.Infof("core bootstrapped and ready on:", routedHost.Addrs())
-	return routedHost, nil
 }
