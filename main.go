@@ -8,6 +8,7 @@ import (
 
 	logging "github.com/ipfs/go-log"
 	"github.com/libp2p/go-libp2p"
+	rcmgr "github.com/libp2p/go-libp2p-resource-manager"
 	"github.com/libp2p/go-libp2p/config"
 	"github.com/libp2p/go-libp2p/p2p/host/autorelay"
 	"github.com/multiformats/go-multiaddr"
@@ -91,6 +92,17 @@ func Option() core.Option {
 	// that is fully configured to best support your p2p application.
 	// Let's create a second host setting some more options.
 	// Set your own keypair
+	// Start with the default scaling limits.
+
+
+	// The resource manager expects a limiter, se we create one from our limits.
+
+	// (Optional if you want metrics) Construct the OpenCensus metrics reporter.
+	// str, err := rcmgrObs.NewStatsTraceReporter()
+	// if err != nil {
+	// 	panic(err)
+	// }
+
 
 	opt := []libp2p.Option{
 		libp2p.DefaultTransports,
@@ -100,7 +112,7 @@ func Option() core.Option {
 		ListenAddrs,
 		// Let's prevent our peer from having too many
 		// connections by attaching a connection manager.
-		libp2p.DefaultResourceManager,
+		ResourceManager,
 		// libp2p.DefaultMuxers,
 		// Let this host use relays and advertise itself on relays if
 		// it finds it is behind NAT. Use libp2p.Relay(options...) to
@@ -121,4 +133,18 @@ func Option() core.Option {
 		LpOpt: opt,
 		ID:    "",
 	}
+}
+
+
+var ResourceManager = func(cfg *libp2p.Config) error {
+	// Default memory limit: 1/8th of total memory, minimum 128MB, maximum 1GB
+	limits := rcmgr.DefaultLimits
+	libp2p.SetDefaultServiceLimits(&limits)
+	limiter := rcmgr.NewFixedLimiter(rcmgr.InfiniteLimits)
+	mgr, err := rcmgr.NewResourceManager(limiter)
+	if err != nil {
+		return err
+	}
+
+	return cfg.Apply(libp2p.ResourceManager(mgr))
 }
