@@ -94,7 +94,6 @@ func Option() core.Option {
 	// Set your own keypair
 	// Start with the default scaling limits.
 
-
 	// The resource manager expects a limiter, se we create one from our limits.
 
 	// (Optional if you want metrics) Construct the OpenCensus metrics reporter.
@@ -102,7 +101,6 @@ func Option() core.Option {
 	// if err != nil {
 	// 	panic(err)
 	// }
-
 
 	opt := []libp2p.Option{
 		libp2p.DefaultTransports,
@@ -135,10 +133,11 @@ func Option() core.Option {
 	}
 }
 
-
 var ResourceManager = func(cfg *libp2p.Config) error {
 	// Default memory limit: 1/8th of total memory, minimum 128MB, maximum 1GB
-	limiter := rcmgr.NewFixedLimiter(rcmgr.InfiniteLimits)
+	limits := rcmgr.DefaultLimits
+	libp2p.SetDefaultServiceLimits(&limits)
+	limiter := rcmgr.NewFixedLimiter(limits.AutoScale())
 	mgr, err := rcmgr.NewResourceManager(limiter)
 	if err != nil {
 		return err
