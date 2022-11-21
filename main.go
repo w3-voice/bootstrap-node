@@ -136,6 +136,7 @@ func Option() core.Option {
 		// performance issues.
 		libp2p.EnableNATService(),
 		libp2p.EnableHolePunching(),
+		libp2p.ForceReachabilityPublic(),
 	}
 	return core.Option{
 		LpOpt: opt,
