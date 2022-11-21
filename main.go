@@ -15,7 +15,7 @@ import (
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	rh "github.com/libp2p/go-libp2p/p2p/host/routed"
 
-	"github.com/ipfs/kubo/core/bootstrap"
+	// "github.com/ipfs/kubo/core/bootstrap"
 
 	logging "github.com/ipfs/go-log"
 	rcmgr "github.com/libp2p/go-libp2p-resource-manager"
