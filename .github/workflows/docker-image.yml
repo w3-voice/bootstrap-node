@@ -19,7 +19,7 @@ jobs:
       uses: docker/metadata-action@v4
       with:
         images: |
-          ${{ secrets.DOCKERHUB_USERNAME }}/hoodboot
+          ${{ secrets.DOCKER_USER }}/hoodboot
         tags: |
           type=ref,event=branch
           type=semver,pattern={{version}}
