@@ -6,12 +6,13 @@ import (
 	"github.com/hood-chat/core/repo"
 	"github.com/hood-chat/core/store"
 	libp2p "github.com/libp2p/go-libp2p"
+	"github.com/pbnjay/memory"
 
 	logging "github.com/ipfs/go-log"
 	"github.com/libp2p/go-libp2p/config"
-	"github.com/libp2p/go-libp2p/p2p/host/autorelay"
 	rcmgr "github.com/libp2p/go-libp2p/p2p/host/resource-manager"
 	"github.com/multiformats/go-multiaddr"
+	"golang.org/x/sys/unix"
 )
 
 var log = logging.Logger("boothood")
@@ -52,8 +53,8 @@ func main() {
 		panic(err)
 	}
 
-	log.Debugf("Hoodboot listens on %s", h.Addrs())
-	log.Debugf("Hoodboot Peer ID is %s", h.ID())
+	log.Warn("Hoodboot listens on %s", h.Addrs())
+	log.Warn("Hoodboot Peer ID is %s", h.ID())
 
 	select {} // block forever
 }
@@ -67,6 +68,10 @@ var ListenAddrs = func(cfg *config.Config) error {
 	if err != nil {
 		return err
 	}
+	quicV1ListenAddr, err := multiaddr.NewMultiaddr("/ip4/0.0.0.0/udp/4001/quic-v1")
+	if err != nil {
+		return err
+	}
 	defaultIP6ListenAddr, err := multiaddr.NewMultiaddr("/ip6/::/tcp/4001")
 	if err != nil {
 		return err
@@ -75,6 +80,7 @@ var ListenAddrs = func(cfg *config.Config) error {
 	return cfg.Apply(libp2p.ListenAddrs(
 		quicListenAddr,
 		ip4ListenAddr,
+		quicV1ListenAddr,
 		defaultIP6ListenAddr,
 	))
 }
@@ -84,7 +90,6 @@ func Option() core.Option {
 	opt := []libp2p.Option{
 		ListenAddrs,
 		ResourceManager,
-		libp2p.EnableAutoRelay(autorelay.WithDefaultStaticRelays()),
 		libp2p.EnableRelayService(),
 		libp2p.EnableNATService(),
 		libp2p.EnableHolePunching(),
@@ -100,11 +105,21 @@ var ResourceManager = func(cfg *libp2p.Config) error {
 	// Default memory limit: 1/8th of total memory, minimum 128MB, maximum 1GB
 	limits := rcmgr.DefaultLimits
 	libp2p.SetDefaultServiceLimits(&limits)
-	limiter := rcmgr.NewFixedLimiter(limits.AutoScale())
+	limiter := rcmgr.NewFixedLimiter(limits.Scale(int64(memory.TotalMemory())/2,getNumFDs()/2))
 	mgr, err := rcmgr.NewResourceManager(limiter)
 	if err != nil {
 		return err
 	}
 
 	return cfg.Apply(libp2p.ResourceManager(mgr))
+}
+
+
+func getNumFDs() int {
+	var l unix.Rlimit
+	if err := unix.Getrlimit(unix.RLIMIT_NOFILE, &l); err != nil {
+		log.Errorw("failed to get fd limit", "error", err)
+		return 0
+	}
+	return int(l.Cur)
 }
