@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/hood-chat/core"
 	"github.com/hood-chat/core/entity"
 	"github.com/hood-chat/core/repo"
@@ -10,6 +12,7 @@ import (
 	logging "github.com/ipfs/go-log"
 	"github.com/libp2p/go-libp2p/config"
 	rcmgr "github.com/libp2p/go-libp2p/p2p/host/resource-manager"
+	"github.com/libp2p/go-libp2p/p2p/protocol/circuitv2/relay"
 	"github.com/multiformats/go-multiaddr"
 	"golang.org/x/sys/unix"
 )
@@ -89,6 +92,7 @@ func Option() core.Option {
 	opt := []libp2p.Option{
 		ListenAddrs,
 		ResourceManager,
+		libp2p.EnableRelayService(relay.WithResources(RelayResources())),
 		libp2p.EnableNATService(),
 		libp2p.EnableHolePunching(),
 		libp2p.ForceReachabilityPublic(),
@@ -110,6 +114,22 @@ var ResourceManager = func(cfg *libp2p.Config) error {
 	}
 
 	return cfg.Apply(libp2p.ResourceManager(mgr))
+}
+
+func RelayResources() relay.Resources {
+	return relay.Resources{
+		Limit: relay.DefaultLimit(),
+
+		ReservationTTL: time.Hour,
+
+		MaxReservations: 128*100,
+		MaxCircuits:     16*100,
+		BufferSize:      2048,
+
+		MaxReservationsPerPeer: 4*100,
+		MaxReservationsPerIP:   8*100,
+		MaxReservationsPerASN:  32*100,
+	}
 }
 
 
