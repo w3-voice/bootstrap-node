@@ -6,7 +6,6 @@ import (
 	"github.com/hood-chat/core/repo"
 	"github.com/hood-chat/core/store"
 	libp2p "github.com/libp2p/go-libp2p"
-	"github.com/pbnjay/memory"
 
 	logging "github.com/ipfs/go-log"
 	"github.com/libp2p/go-libp2p/config"
@@ -90,7 +89,6 @@ func Option() core.Option {
 	opt := []libp2p.Option{
 		ListenAddrs,
 		ResourceManager,
-		libp2p.EnableRelayService(),
 		libp2p.EnableNATService(),
 		libp2p.EnableHolePunching(),
 		libp2p.ForceReachabilityPublic(),
