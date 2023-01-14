@@ -105,7 +105,7 @@ var ResourceManager = func(cfg *libp2p.Config) error {
 	// Default memory limit: 1/8th of total memory, minimum 128MB, maximum 1GB
 	limits := rcmgr.DefaultLimits
 	libp2p.SetDefaultServiceLimits(&limits)
-	limiter := rcmgr.NewFixedLimiter(limits.Scale(int64(memory.TotalMemory())/2,getNumFDs()/2))
+	limiter := rcmgr.NewFixedLimiter(rcmgr.InfiniteLimits)
 	mgr, err := rcmgr.NewResourceManager(limiter)
 	if err != nil {
 		return err
