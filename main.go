@@ -120,15 +120,15 @@ func RelayResources() relay.Resources {
 	return relay.Resources{
 		Limit: relay.DefaultLimit(),
 
-		ReservationTTL: time.Hour,
+		ReservationTTL: time.Minute,
 
-		MaxReservations: 128*100,
-		MaxCircuits:     16*100,
+		MaxReservations: 128*1000,
+		MaxCircuits:     16*1000,
 		BufferSize:      2048,
 
-		MaxReservationsPerPeer: 4*100,
-		MaxReservationsPerIP:   8*100,
-		MaxReservationsPerASN:  32*100,
+		MaxReservationsPerPeer: 4*1000,
+		MaxReservationsPerIP:   8*1000,
+		MaxReservationsPerASN:  32*1000,
 	}
 }
 
