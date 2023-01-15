@@ -2,7 +2,6 @@ module github.com/hood-chat/bootstrap-node
 
 go 1.19
 
-replace github.com/hood-chat/core => ../core
 
 require (
 	github.com/hood-chat/core v0.1.1-0.20230110082628-33b40e178b9a
