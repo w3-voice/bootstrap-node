@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
 
 ENV SRC_DIR /hbnode
 ENV APP_DIR /hbnode
-ENV OUT hbnode
+ENV OUT /hoodboot
 
 WORKDIR $SRC_DIR
 
@@ -19,7 +19,7 @@ RUN go mod download
 
 COPY . $SRC_DIR
 
-RUN go build -o $OUT
+RUN go build -o $OUT ./cmd/hoodboot
 
 
 
