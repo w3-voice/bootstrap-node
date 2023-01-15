@@ -1,3 +1,5 @@
+
+
 FROM golang:1.19 as builder
 
 # Install deps
@@ -25,6 +27,9 @@ RUN go build -o $OUT ./cmd/hoodboot
 
 
 FROM alpine
+ENV SRC_DIR /hbnode
+ENV APP_DIR /hbnode
+ENV OUT /hoodboot
 WORKDIR $SRC_DIR
 COPY --from=builder $SRC_DIR/$OUT $APP_DIR
 
