@@ -2,11 +2,12 @@ module github.com/hood-chat/bootstrap-node
 
 go 1.19
 
-
 require (
 	github.com/hood-chat/core v0.1.1-0.20230110082628-33b40e178b9a
-	github.com/ipfs/go-log v1.0.5
+	github.com/ipfs/go-datastore v0.6.0
+	github.com/ipfs/kubo v0.17.0
 	github.com/libp2p/go-libp2p v0.24.2
+	github.com/libp2p/go-libp2p-kad-dht v0.20.0
 	github.com/multiformats/go-multiaddr v0.8.0
 )
 
@@ -44,11 +45,10 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/huin/goupnp v1.0.3 // indirect
 	github.com/ipfs/go-cid v0.3.2 // indirect
-	github.com/ipfs/go-datastore v0.6.0 // indirect
 	github.com/ipfs/go-ipfs-util v0.0.2 // indirect
 	github.com/ipfs/go-ipns v0.3.0 // indirect
+	github.com/ipfs/go-log v1.0.5 // indirect
 	github.com/ipfs/go-log/v2 v2.5.1 // indirect
-	github.com/ipfs/kubo v0.17.0 // indirect
 	github.com/ipld/go-ipld-prime v0.19.0 // indirect
 	github.com/jackpal/go-nat-pmp v1.0.2 // indirect
 	github.com/jbenet/go-temp-err-catcher v0.1.0 // indirect
@@ -60,7 +60,6 @@ require (
 	github.com/libp2p/go-cidranger v1.1.0 // indirect
 	github.com/libp2p/go-flow-metrics v0.1.0 // indirect
 	github.com/libp2p/go-libp2p-asn-util v0.2.0 // indirect
-	github.com/libp2p/go-libp2p-kad-dht v0.20.0 // indirect
 	github.com/libp2p/go-libp2p-kbucket v0.5.0 // indirect
 	github.com/libp2p/go-libp2p-record v0.2.0 // indirect
 	github.com/libp2p/go-msgio v0.2.0 // indirect
