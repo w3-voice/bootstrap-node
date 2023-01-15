@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y \
   fuse
 
 ENV SRC_DIR /hbnode
-ENV APP_DIR /hbnode
 ENV OUT /hoodboot
 
 WORKDIR $SRC_DIR
@@ -27,16 +26,14 @@ RUN go build -o $OUT ./cmd/hoodboot
 
 
 FROM alpine
-ENV SRC_DIR /hbnode
 ENV APP_DIR /hbnode
 ENV OUT /hoodboot
-WORKDIR $SRC_DIR
-COPY --from=builder $SRC_DIR/$OUT $APP_DIR
+WORKDIR $APP_DIR
+COPY --from=builder $OUT $APP_DIR
 
-VOLUME $APP_DIR/data
 # Swarm TCP; should be exposed to the public
 EXPOSE 4002
 # Swarm UDP; should be exposed to the public
 EXPOSE 4002/udp
 
-CMD ["./hbnode"]
+ENTRYPOINT ["./hoodboot"]
