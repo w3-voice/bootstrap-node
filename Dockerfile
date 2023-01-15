@@ -1,4 +1,4 @@
-FROM golang:1.19
+FROM golang:1.19 as builder
 
 # Install deps
 RUN apt-get update && apt-get install -y \
@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y \
   fuse
 
 ENV SRC_DIR /hbnode
+ENV APP_DIR /hbnode
+ENV OUT hbnode
 
 WORKDIR $SRC_DIR
 
@@ -17,12 +19,19 @@ RUN go mod download
 
 COPY . $SRC_DIR
 
-RUN go build -o hbnode
+RUN go build -o $OUT
 
-VOLUME $SRC_DIR/data
+
+
+
+FROM alpine
+WORKDIR $SRC_DIR
+COPY --from=builder $SRC_DIR/$OUT $APP_DIR
+
+VOLUME $APP_DIR/data
 # Swarm TCP; should be exposed to the public
-EXPOSE 4001
+EXPOSE 4002
 # Swarm UDP; should be exposed to the public
-EXPOSE 4001/udp
+EXPOSE 4002/udp
 
 CMD ["./hbnode"]

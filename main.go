@@ -1,7 +1,6 @@
 package main
 
 import (
-	"time"
 
 	"github.com/hood-chat/core"
 	"github.com/hood-chat/core/entity"
@@ -12,9 +11,7 @@ import (
 	logging "github.com/ipfs/go-log"
 	"github.com/libp2p/go-libp2p/config"
 	rcmgr "github.com/libp2p/go-libp2p/p2p/host/resource-manager"
-	"github.com/libp2p/go-libp2p/p2p/protocol/circuitv2/relay"
 	"github.com/multiformats/go-multiaddr"
-	"golang.org/x/sys/unix"
 )
 
 var log = logging.Logger("boothood")
@@ -62,19 +59,19 @@ func main() {
 }
 
 var ListenAddrs = func(cfg *config.Config) error {
-	ip4ListenAddr, err := multiaddr.NewMultiaddr("/ip4/0.0.0.0/tcp/4001")
+	ip4ListenAddr, err := multiaddr.NewMultiaddr("/ip4/0.0.0.0/tcp/4002")
 	if err != nil {
 		return err
 	}
-	quicListenAddr, err := multiaddr.NewMultiaddr("/ip4/0.0.0.0/udp/4001/quic")
+	quicListenAddr, err := multiaddr.NewMultiaddr("/ip4/0.0.0.0/udp/4002/quic")
 	if err != nil {
 		return err
 	}
-	quicV1ListenAddr, err := multiaddr.NewMultiaddr("/ip4/0.0.0.0/udp/4001/quic-v1")
+	quicV1ListenAddr, err := multiaddr.NewMultiaddr("/ip4/0.0.0.0/udp/4002/quic-v1")
 	if err != nil {
 		return err
 	}
-	defaultIP6ListenAddr, err := multiaddr.NewMultiaddr("/ip6/::/tcp/4001")
+	defaultIP6ListenAddr, err := multiaddr.NewMultiaddr("/ip6/::/tcp/4002")
 	if err != nil {
 		return err
 	}
@@ -92,9 +89,7 @@ func Option() core.Option {
 	opt := []libp2p.Option{
 		ListenAddrs,
 		ResourceManager,
-		libp2p.EnableRelayService(relay.WithResources(RelayResources())),
 		libp2p.EnableNATService(),
-		libp2p.EnableHolePunching(),
 		libp2p.ForceReachabilityPublic(),
 	}
 	return core.Option{
@@ -116,28 +111,4 @@ var ResourceManager = func(cfg *libp2p.Config) error {
 	return cfg.Apply(libp2p.ResourceManager(mgr))
 }
 
-func RelayResources() relay.Resources {
-	return relay.Resources{
-		Limit: relay.DefaultLimit(),
 
-		ReservationTTL: time.Minute,
-
-		MaxReservations: 128*1000,
-		MaxCircuits:     16*1000,
-		BufferSize:      2048,
-
-		MaxReservationsPerPeer: 4*1000,
-		MaxReservationsPerIP:   8*1000,
-		MaxReservationsPerASN:  32*1000,
-	}
-}
-
-
-func getNumFDs() int {
-	var l unix.Rlimit
-	if err := unix.Getrlimit(unix.RLIMIT_NOFILE, &l); err != nil {
-		log.Errorw("failed to get fd limit", "error", err)
-		return 0
-	}
-	return int(l.Cur)
-}

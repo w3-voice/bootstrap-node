@@ -2,13 +2,13 @@ module github.com/hood-chat/bootstrap-node
 
 go 1.19
 
+replace github.com/hood-chat/core => ../core
+
 require (
 	github.com/hood-chat/core v0.1.1-0.20230110082628-33b40e178b9a
 	github.com/ipfs/go-log v1.0.5
 	github.com/libp2p/go-libp2p v0.24.2
 	github.com/multiformats/go-multiaddr v0.8.0
-	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
-	golang.org/x/sys v0.4.0
 )
 
 require (
@@ -94,6 +94,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.6.1 // indirect
 	github.com/opencontainers/runtime-spec v1.0.2 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
+	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/polydawn/refmt v0.0.0-20201211092308-30ac6d18308e // indirect
 	github.com/prometheus/client_golang v1.14.0 // indirect
@@ -116,6 +117,7 @@ require (
 	golang.org/x/mod v0.7.0 // indirect
 	golang.org/x/net v0.5.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
+	golang.org/x/sys v0.4.0 // indirect
 	golang.org/x/tools v0.5.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	lukechampine.com/blake3 v1.1.7 // indirect
