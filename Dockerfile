@@ -1,12 +1,4 @@
-
-
-FROM golang:1.19 as builder
-
-# Install deps
-RUN apt-get update && apt-get install -y \
-  libssl-dev \
-  ca-certificates \
-  fuse
+FROM  golang:alpine as builder
 
 ENV SRC_DIR /hbnode
 ENV OUT /hoodboot
@@ -29,6 +21,8 @@ FROM alpine
 ENV APP_DIR /hbnode
 ENV OUT /hoodboot
 WORKDIR $APP_DIR
+
+
 COPY --from=builder $OUT $APP_DIR
 
 # Swarm TCP; should be exposed to the public
