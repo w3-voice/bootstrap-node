@@ -14,6 +14,7 @@ import (
 	"github.com/ipfs/kubo/core/bootstrap"
 	"github.com/libp2p/go-libp2p"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
+	rcmgr "github.com/libp2p/go-libp2p/p2p/host/resource-manager"
 	rh "github.com/libp2p/go-libp2p/p2p/host/routed"
 	"github.com/libp2p/go-libp2p/p2p/net/connmgr"
 	ma "github.com/multiformats/go-multiaddr"
@@ -39,7 +40,8 @@ func main() {
 	opts = append(opts,
 		libp2p.UserAgent("hoodboot/1.0"),
 		libp2p.Identity(privk),
-		libp2p.DisableRelay(),
+		libp2p.EnableRelay(),
+		libp2p.EnableHolePunching(),
 		libp2p.EnableNATService(),
 		libp2p.ListenAddrStrings(cfg.Network.ListenAddrs...),
 	)
@@ -80,6 +82,15 @@ func main() {
 
 	opts = append(opts,
 		libp2p.ConnectionManager(cm),
+	)
+
+	rm, err := rcmgr.NewResourceManager(rcmgr.NewFixedLimiter(rcmgr.InfiniteLimits))
+	if err != nil {
+		panic(err)
+	}
+
+	opts = append(opts,
+		libp2p.ResourceManager(rm),
 	)
 
 	host, err := libp2p.New(opts...)
