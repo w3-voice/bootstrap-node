@@ -40,7 +40,7 @@ func main() {
 	opts = append(opts,
 		libp2p.UserAgent("hoodboot/1.0"),
 		libp2p.Identity(privk),
-		libp2p.EnableRelay(),
+
 		libp2p.EnableHolePunching(),
 		libp2p.EnableNATService(),
 		libp2p.ListenAddrStrings(cfg.Network.ListenAddrs...),
@@ -68,6 +68,22 @@ func main() {
 				}
 				return announce
 			}),
+		)
+	}
+
+	if cfg.Relay.Enable {
+		opts = append(opts,
+			libp2p.EnableRelay(),
+		)
+	} else {
+		opts = append(opts,
+			libp2p.DisableRelay(),
+		)
+	}
+
+	if cfg.HolePunch.Enable {
+		opts = append(opts,
+			libp2p.EnableHolePunching(),
 		)
 	}
 
@@ -104,11 +120,17 @@ func main() {
 		fmt.Printf("\t%s/p2p/%s\n", addr, host.ID())
 	}
 
-	// Setup DHT
-	dstore := dsync.MutexWrap(ds.NewMapDatastore())
+	var kDht *dht.IpfsDHT = nil
+	if cfg.DHT.Enable {
+		// Setup DHT
+		dstore := dsync.MutexWrap(ds.NewMapDatastore())
 
-	// Make the DHT
-	kDht := dht.NewDHT(context.Background(), host, dstore)
+		// Make the DHT
+		kDht = dht.NewDHT(context.Background(), host, dstore)
+
+		// Make the routed host
+		rh.Wrap(host, kDht)
+	}
 
 	bts, err := hoodboot.ParsePeers(cfg.Bootstrap.Peers)
 	if err != nil {
@@ -122,8 +144,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// Make the routed host
-	rh.Wrap(host, kDht)
 
 	go listenPprof(cfg.Daemon.PprofPort)
 	time.Sleep(10 * time.Millisecond)

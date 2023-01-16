@@ -14,10 +14,13 @@ import (
 // Config stores the full configuration of the relays, ACLs and other settings
 // that influence behaviour of a relay daemon.
 type Config struct {
-	Network   NetworkConfig
-	ConnMgr   ConnMgrConfig
-	Bootstrap BootstrapConfig
-	Daemon    DaemonConfig
+	Network    NetworkConfig
+	ConnMgr    ConnMgrConfig
+	Bootstrap  BootstrapConfig
+	Daemon     DaemonConfig
+	Relay      RelayConfig
+	HolePunch  HolePunchConfig
+	DHT        DHTConfig
 }
 
 // DaemonConfig controls settings for the relay-daemon itself.
@@ -45,7 +48,17 @@ type BootstrapConfig struct {
 	MinPeerThreshold  int
 }
 
+type RelayConfig struct {
+	Enable	bool
+}
 
+type HolePunchConfig struct {
+	Enable bool
+}
+
+type DHTConfig struct {
+	Enable bool
+}
 
 // DefaultConfig returns a default relay configuration using default resource
 // settings and no ACLs.
@@ -70,6 +83,15 @@ func DefaultConfig() Config {
 		},
 		Daemon: DaemonConfig{
 			PprofPort: 6060,
+		},
+		DHT: DHTConfig{
+			Enable: true,
+		},
+		Relay: RelayConfig{
+			Enable: true,
+		},
+		HolePunch: HolePunchConfig{
+			Enable: true,
 		},
 	}
 }
