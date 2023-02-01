@@ -75,6 +75,7 @@ func main() {
 	if cfg.Relay.Enable {
 		opts = append(opts,
 			libp2p.EnableRelay(),
+			libp2p.EnableRelayService(),
 		)
 	} else {
 		opts = append(opts,
