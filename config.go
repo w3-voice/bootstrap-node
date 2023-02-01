@@ -21,6 +21,7 @@ type Config struct {
 	Relay      RelayConfig
 	HolePunch  HolePunchConfig
 	DHT        DHTConfig
+	PubSub     PubSubConfig
 }
 
 // DaemonConfig controls settings for the relay-daemon itself.
@@ -60,6 +61,10 @@ type DHTConfig struct {
 	Enable bool
 }
 
+type PubSubConfig struct {
+	Enable bool
+}
+
 // DefaultConfig returns a default relay configuration using default resource
 // settings and no ACLs.
 func DefaultConfig() Config {
@@ -85,12 +90,15 @@ func DefaultConfig() Config {
 			PprofPort: 6060,
 		},
 		DHT: DHTConfig{
-			Enable: true,
+			Enable: false,
 		},
 		Relay: RelayConfig{
 			Enable: true,
 		},
 		HolePunch: HolePunchConfig{
+			Enable: true,
+		},
+		PubSub: PubSubConfig{
 			Enable: true,
 		},
 	}

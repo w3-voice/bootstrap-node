@@ -14,6 +14,7 @@ import (
 	"github.com/ipfs/kubo/core/bootstrap"
 	"github.com/libp2p/go-libp2p"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
+	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	rcmgr "github.com/libp2p/go-libp2p/p2p/host/resource-manager"
 	rh "github.com/libp2p/go-libp2p/p2p/host/routed"
 	"github.com/libp2p/go-libp2p/p2p/net/connmgr"
@@ -130,20 +131,29 @@ func main() {
 
 		// Make the routed host
 		rh.Wrap(host, kDht)
+
+		bts, err := hoodboot.ParsePeers(cfg.Bootstrap.Peers)
+		if err != nil {
+			panic(err)
+		}
+		btconf := bootstrap.BootstrapConfigWithPeers(bts)
+		btconf.MinPeerThreshold = cfg.Bootstrap.MinPeerThreshold
+	
+		// connect to the chosen ipfs nodes
+		_, err = bootstrap.Bootstrap(host.ID(), host, kDht, btconf)
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	bts, err := hoodboot.ParsePeers(cfg.Bootstrap.Peers)
-	if err != nil {
-		panic(err)
+	if cfg.PubSub.Enable {
+		_, err := pubsub.NewGossipSub(context.Background(), host)
+		if err != nil {
+			panic(err)
+		}
 	}
-	btconf := bootstrap.BootstrapConfigWithPeers(bts)
-	btconf.MinPeerThreshold = cfg.Bootstrap.MinPeerThreshold
 
-	// connect to the chosen ipfs nodes
-	_, err = bootstrap.Bootstrap(host.ID(), host, kDht, btconf)
-	if err != nil {
-		panic(err)
-	}
+
 
 	go listenPprof(cfg.Daemon.PprofPort)
 	time.Sleep(10 * time.Millisecond)
